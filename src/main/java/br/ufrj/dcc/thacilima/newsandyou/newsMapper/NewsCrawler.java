@@ -13,7 +13,7 @@ import br.ufrj.dcc.thacilima.newsandyou.data.NewsData;
 public class NewsCrawler {
 	private static int countTrialsToConnectURL = 5;
 	
-	private static int pages = 3;
+	private static int pages = 2;
 	private static String nmeSearchNewsBaseURL = "http://www.nme.com/news/music/page";
 	private static int nmeIdSourceNews = 1;
 	
@@ -67,8 +67,8 @@ public class NewsCrawler {
 			
 			if (doc != null)
 			{
-				Element content = doc.getElementById("container").getElementById("content");
-				Elements articleList = content.select("article.hpElement");
+				Element content = doc.getElementById("wrapper").getElementById("content");
+				Elements articleList = content.select("article.post");
 				
 				for (int i = 0; i < articleList.size(); i++) {
 					Element article =  articleList.get(i);
@@ -77,19 +77,17 @@ public class NewsCrawler {
 						
 					}
 					else {
-						Element img = article.getElementsByClass("imgph").get(0).getElementsByTag("img").get(0);
+						Element img = article.getElementsByClass("entry-media").get(0).getElementsByTag("img").get(0);
 						String imageUrl =  img.attr("src");
 						
-						Element indexInfo = article.getElementsByClass("indexInfo").get(0);
+						Element header = article.getElementsByClass("entry-header").get(0);
 						
-						Element aTitle = indexInfo.getElementsByTag("h2").get(0).getElementsByTag("a").get(0);
+						Element aTitle = header.getElementsByTag("h2").get(0).getElementsByTag("a").get(0);
 						String uri = aTitle.attr("href");
 						String title = aTitle.text();
 						title = title.replace("'", "\\'");
 						
-						Element pSubtitle = indexInfo.getElementsByTag("p").get(0);
-						String subtitle = pSubtitle.text();
-						subtitle = subtitle.replace("'", "\\'");
+						String subtitle = "";
 						
 						System.out.println("imageURL: " + imageUrl + " uri: " + uri + " title: " + title + " subtitle: " + subtitle);
 						
