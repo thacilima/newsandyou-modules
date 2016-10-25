@@ -78,12 +78,24 @@ public class NewsContentCrawler {
 			
 			if (doc != null)
 			{
-				Element content = doc.getElementById("container").getElementById("content");
-				Element articleHeader = content.getElementsByClass("article_header").get(0);
-				Element articleText = content.getElementsByClass("article_text").get(0);
+				Element content = doc.getElementById("wrapper").getElementById("content");
+				Element article = content.getElementsByClass("primary").get(0).select("article.post").get(0);
+				Element articleHeader = article.getElementsByClass("page-header").get(0).getElementsByTag("h1").get(0);
+				Element articleText = content.getElementsByClass("entry-content").get(0).
+						getElementsByAttributeValue("itemprop", "articleBody").get(0);
 				
 				String headerString = articleHeader.text();
-				String textString = articleText.text();
+				
+				// Get only text in p
+				String textString = "";
+				for (Element p : articleText.getElementsByTag("p")) {
+					if (!p.text().isEmpty()) { 
+						textString += p.text() + " ";
+					}
+				}
+				if (textString.isEmpty()) {
+					textString = articleText.text();
+				}
 				
 				//Save in new file
 				File file = new File("news/txt/new"+ idNews +".txt");
