@@ -83,7 +83,10 @@ public class NewsCrawler {
 						Element header = article.getElementsByClass("entry-header").get(0);
 						
 						Element aTitle = header.getElementsByTag("h2").get(0).getElementsByTag("a").get(0);
+						
 						String uri = aTitle.attr("href");
+						uri = uri.replace("http://www.nme.com", "");
+						
 						String title = aTitle.text();
 						title = title.replace("'", "\\'");
 						
