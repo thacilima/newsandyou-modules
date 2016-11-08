@@ -15,7 +15,8 @@ import br.ufrj.dcc.thacilima.newsandyou.model.Attribute;
 
 public class AttributeFacebookCrawler {
 	
-	private static int countTrialsToConnectURL = 5;
+	private static boolean tryAllAttributesWithoutFacebook = false;
+	private static int countTrialsToConnectURL = 3;
 	
 	public static void main(String[] args) {
 		
@@ -32,28 +33,52 @@ public class AttributeFacebookCrawler {
 	public static void findFacebookDataForEntities(AttributeData attributeData) {
 		List<Attribute> attributes =  new ArrayList<Attribute>();
 		try {
-			attributes = attributeData.getAllWithNoFacebookData();
+			if (tryAllAttributesWithoutFacebook) {
+				attributes = attributeData.getAllWithNoFacebookData();
+			}
+			else {
+				attributes = attributeData.getAllDidNotTryCollectFbYet();
+			}
+			
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 		
+		int totalAttributes = attributes.size();
+		int searchedFbCounter = 0;
+		
 		for (Attribute attribute : attributes) {
+			searchedFbCounter++;
+			String linkedBrainzURI = attribute.getLbUri();
 			
-			
-			searchFBDataInUrl(attributeData, attribute.getLbUri());
+			searchFBDataInUrl(attributeData, linkedBrainzURI);
 			
 			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
+				attributeData.updateTriedRecoverFbFlag(linkedBrainzURI);
+			} catch (SQLException e) {
 				e.printStackTrace();
 			}
+			
+			System.out.println(percentage(totalAttributes, searchedFbCounter));
+			
+//			try {
+//				Thread.sleep(1000);
+//			} catch (InterruptedException e) {
+//				e.printStackTrace();
+//			}
 		}
 		
 	}
 	
-	public static void searchFBDataInUrl(AttributeData attributeData, String uri) {
+	public static String percentage(int total, int done) {
+		Double doneDouble = (double) done;
+		Double percentage = (doneDouble/total)*100;
+		return String.format("%.4f", percentage) + "%";
+	}
+	
+	public static void searchFBDataInUrl(AttributeData attributeData, String linkedBrainzURI) {
 
-		String url =  "https://musicbrainz.org/artist/"+uri;
+		String url =  "https://musicbrainz.org/artist/"+linkedBrainzURI;
 		Document doc = null;
 		while (countTrialsToConnectURL > 0) {
 			
@@ -64,13 +89,13 @@ public class AttributeFacebookCrawler {
 			try {
 				doc = Jsoup.connect(url).get();
 			} catch (IOException e) {
-				e.printStackTrace();
+//				e.printStackTrace();
 				
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException e1) {
-					e1.printStackTrace();
-				}
+//				try {
+//					Thread.sleep(1000);
+//				} catch (InterruptedException e1) {
+//					e1.printStackTrace();
+//				}
 				
 			}
 			
@@ -83,6 +108,7 @@ public class AttributeFacebookCrawler {
 				//get the li element that contains fb info
 				Elements liFacebookInfoList = ulExternalLinks.getElementsByClass("facebook-favicon");
 				
+				//if there is fb link on musicbrainz page
 				if (liFacebookInfoList.size() > 0) {
 					Element liFacebookInfo = liFacebookInfoList.get(0);
 					
@@ -98,15 +124,15 @@ public class AttributeFacebookCrawler {
 					
 					System.out.println(url + " - " + facebookLink);
 					
+					
 					try {
-						attributeData.updateFbUriForLbUri(facebookLink, uri);
+						attributeData.updateFbUriForLbUri(facebookLink, linkedBrainzURI);
 					} catch (SQLException e) {
 						e.printStackTrace();
-					}
-					
+					}					
 				}
 				else {
-					System.out.println(url + " - " + "facebook link didn't found");
+//					System.out.println(url + " - " + "facebook link didn't found");
 				}
 				
 				break;

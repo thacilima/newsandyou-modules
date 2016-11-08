@@ -78,7 +78,7 @@ public class NewsCrawler {
 					}
 					else {
 						Element img = article.getElementsByClass("entry-media").get(0).getElementsByTag("img").get(0);
-						String imageUrl =  img.attr("src");
+						String imageUrl =  img.attr("data-echo");
 						
 						Element header = article.getElementsByClass("entry-header").get(0);
 						

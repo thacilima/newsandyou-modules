@@ -21,6 +21,14 @@ public class AttributeData {
 		this.db = new DBUtil();
 	}
 	
+	public List<Attribute> getAllDidNotTryCollectFbYet() throws SQLException {
+		String sql = "select * from atributo where flag_fb = '0'";
+		ResultSet rs = this.db.runSql(sql);
+		List<Attribute> all = attributesFromResultSet(rs);
+		
+		return all;
+	}
+	
 	public List<Attribute> getAllWithNoFacebookData() throws SQLException {
 		String sql = "select * from atributo where fb_uri is null or fb_uri = ''";
 		ResultSet rs = this.db.runSql(sql);
@@ -36,6 +44,15 @@ public class AttributeData {
 	
 	public void updateFbUriForLbUri(String facebookUri, String linkedBrainzUri) throws SQLException {
 		String sqlSetFbUrl = "UPDATE atributo SET fb_uri = '" + facebookUri +"' WHERE lb_uri = '" + linkedBrainzUri + "'";
+		int totalChanges = this.db.runInsertUpdateDeleteSql(sqlSetFbUrl);
+		if (totalChanges <= 0)
+		{
+			throw new SQLException();
+		}
+	}
+	
+	public void updateTriedRecoverFbFlag(String linkedBrainzUri) throws SQLException {
+		String sqlSetFbUrl = "UPDATE atributo SET flag_fb = '1' WHERE lb_uri = '" + linkedBrainzUri + "'";
 		int totalChanges = this.db.runInsertUpdateDeleteSql(sqlSetFbUrl);
 		if (totalChanges <= 0)
 		{

@@ -15,7 +15,9 @@ public class DBUtil {
 	 
 	public DBUtil() throws ClassNotFoundException, SQLException {
 		Class.forName("com.mysql.jdbc.Driver");
-		String url = "jdbc:mysql://localhost:3306/newsandyou_db";
+		String server = "localhost";
+		//String server = "54.87.165.196";
+		String url = "jdbc:mysql://"+server+":3306/newsandyou_db";
 		conn = DriverManager.getConnection(url, "root", "12345");
 		System.out.println("connection built");
 	}
